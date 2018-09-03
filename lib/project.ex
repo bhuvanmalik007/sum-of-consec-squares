@@ -2,6 +2,7 @@ import Integer
 
 defmodule Project do
   def testing(n, k) do
+    IO.puts("hey now")
     Enum.reduce(1..n, [], fn x, acc ->
       sqRoot = :math.sqrt((k - 1) * k * (2 * k - 1) / 6 + k * (x * x) + k * (k - 1) * x)
       (sqRoot - trunc(sqRoot) == 0 && acc ++ [x]) || acc
@@ -10,17 +11,16 @@ defmodule Project do
 
   def cases(n, k) do
     case1 = twelveLambdaCase(k)
-    IO.puts("Case1: " <> "#{inspect(case1)}")
+    IO.puts("\nCase1: " <> "#{inspect(case1)}")
     case2 = eightLambda(k)
-    IO.puts("Case2: " <> "#{inspect(case2)}")
+    IO.puts("\nCase2: " <> "#{inspect(case2)}")
     case3 = twelveLambda(k)
-    IO.puts("Case3: " <> "#{inspect(case3)}")
+    IO.puts("\nCase3: " <> "#{inspect(case3)}")
     case4 = evenTwoThreePowerCase(k)
-    IO.puts("Case4: " <> "#{inspect(case4)}")
+    IO.puts("\nCase4: " <> "#{inspect(case4)}")
     case5 = onlyTwoThreeCase(k)
-    IO.puts("Case5: " <> "#{inspect(case5)}")
-    case6 = onlyTwoThreeCase(k)
-    IO.puts("Case5: " <> "#{inspect(case5)}")
+    IO.puts("\nCase5: " <> "#{inspect(case5)}")
+    IO.puts("\n\nFINAL ANSWER: " <> "#{inspect(((case1 || case2 || case3 || case4 ||case5) && "no solution") || (testing(n, k)))}")
   end
 
   def eightLambda(k) do
@@ -55,7 +55,7 @@ defmodule Project do
       IO.puts("\n\npowersOnly: " <> "#{inspect(powersOnly)}")
 
       Enum.any?(powersOnly, fn power -> Integer.is_even(power) end) ||
-        (powers == [{2, 1}] && false)
+        (k == 2 && false)
     end
   end
 
