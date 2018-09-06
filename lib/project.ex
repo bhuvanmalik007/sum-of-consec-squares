@@ -1,7 +1,26 @@
 import Integer
 
-defmodule Project do
+defmodule SupervisorModule do
+  def resultReceiver(result) do
+    #supervisor receive stuff
+    receive do
+      {:ok, resultFromProcess, idleProcessPID} ->
+        # IO.puts("inside receive")
+
+        result = result ++ resultFromProcess
+        IO.puts("Result: #{inspect(result)}")
+        resultReceiver(result)
+
+    end # receive end
+
+  end # resultReceiver end
+
   def supervisor(n, k) do
+    result = []
+
+    #spawning resultReceiver
+    resultReceiverPID = spawn(SupervisorModule, :resultReceiver, [[]])
+
     truncatedLength = trunc(n / k)
     totalIntervals = (rem(n, k) == 0 && k) || k + 1
 
@@ -18,33 +37,32 @@ defmodule Project do
       (intervalList ++
         Keyword.put_new([], :"interval#{inspect(k + 1)}", %{start: ((k * trunc(n / k)) + 1), end: n}))
 
-
-      filteredIntervals = Enum.reduce(1..trunc(k/2), intervalList, fn(i, acc) ->
-        spawn(Project, :sumOfSquares, Keyword.get_values(intervalList, :"interval#{inspect(i)}"))
-        filteredIntervalList = Enum.filter(acc, fn(interval) ->
-            Map.get(Keyword.get(intervalList, :"interval#{inspect(i)}"), :start) != Map.get(elem(interval, 1), :start)
-
-      end)#end of filter
+      filteredIntervals = Enum.reduce(1..length(intervalList), intervalList, fn(i, acc) ->
+        spawn(SupervisorModule, :sumOfSquares, [Keyword.get(intervalList, :"interval#{inspect(i)}"), k, resultReceiverPID])
+        # filteredIntervalList = Enum.filter(acc, fn(interval) ->
+        #     Map.get(Keyword.get(intervalList, :"interval#{inspect(i)}"), :start) != Map.get(elem(interval, 1), :start)
+      # end)#end of filter
     end) #end of reduce
 
-    #supervisor receive stuff
 
   end #end of supervisor
 
-
-
-
-
-
-
-  def sumOfSquares(interval) do
-    # IO.puts("inside process")
-    IO.puts("#{inspect(interval)}")
-    # Enum.reduce(1..n, [], fn x, acc ->
-    #   sqRoot = :math.sqrt((k - 1) * k * (2 * k - 1) / 6 + k * (x * x) + k * (k - 1) * x)
-    #   (sqRoot - trunc(sqRoot) == 0 && Process.exit(self, [x])) || acc
-    # end)
+  def sumOfSquares(interval, k, supervisorPID) do
+    # IO.puts("supervisorPID: #{inspect(supervisorPID)}")
+    start = Map.get(interval, :start)
+    finish = Map.get(interval, :end)
+    result = Enum.reduce(start..finish, [], fn x, acc ->
+      sqRoot = :math.sqrt((k - 1) * k * (2 * k - 1) / 6 + k * (x * x) + k * (k - 1) * x)
+      (sqRoot - trunc(sqRoot) == 0 && acc ++ [x]) || acc
+    end)
+    send supervisorPID, {:ok, result, self}
   end
+
+end # module end
+
+
+
+defmodule Project do
 
   def cases(n, k) do
     case1 = twelveLambdaCase(k)
