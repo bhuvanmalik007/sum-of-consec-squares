@@ -1,11 +1,49 @@
 import Integer
 
 defmodule Project do
-  def testing(n, k) do
-    Enum.reduce(1..n, [], fn x, acc ->
-      sqRoot = :math.sqrt((k - 1) * k * (2 * k - 1) / 6 + k * (x * x) + k * (k - 1) * x)
-      (sqRoot - trunc(sqRoot) == 0 && Process.exit(self, [x])) || acc
-    end)
+  def supervisor(n, k) do
+    truncatedLength = trunc(n / k)
+    totalIntervals = (rem(n, k) == 0 && k) || k + 1
+
+    intervalList =
+      Enum.reduce(1..k, [], fn intervalNo, acc ->
+        startNo = (intervalNo - 1) * truncatedLength + 1
+        endingNo = intervalNo * truncatedLength
+
+        acc ++
+          Keyword.put_new([], :"interval#{inspect(intervalNo)}", %{start: startNo, end: endingNo})
+      end)
+
+      intervalList = (totalIntervals == (k + 1)) &&
+      (intervalList ++
+        Keyword.put_new([], :"interval#{inspect(k + 1)}", %{start: ((k * trunc(n / k)) + 1), end: n}))
+
+
+      filteredIntervals = Enum.reduce(1..trunc(k/2), intervalList, fn(i, acc) ->
+        spawn(Project, :sumOfSquares, Keyword.get_values(intervalList, :"interval#{inspect(i)}"))
+        filteredIntervalList = Enum.filter(acc, fn(interval) ->
+            Map.get(Keyword.get(intervalList, :"interval#{inspect(i)}"), :start) != Map.get(elem(interval, 1), :start)
+
+      end)#end of filter
+    end) #end of reduce
+
+    #supervisor receive stuff
+
+  end #end of supervisor
+
+
+
+
+
+
+
+  def sumOfSquares(interval) do
+    # IO.puts("inside process")
+    IO.puts("#{inspect(interval)}")
+    # Enum.reduce(1..n, [], fn x, acc ->
+    #   sqRoot = :math.sqrt((k - 1) * k * (2 * k - 1) / 6 + k * (x * x) + k * (k - 1) * x)
+    #   (sqRoot - trunc(sqRoot) == 0 && Process.exit(self, [x])) || acc
+    # end)
   end
 
   def cases(n, k) do
@@ -20,12 +58,12 @@ defmodule Project do
     case5 = onlyTwoThreeCase(k)
     IO.puts("\nCase5: " <> "#{inspect(case5)}")
 
-    IO.puts(
-      "\n\nFINAL ANSWER: " <>
-        "#{
-          inspect(((case1 || case2 || case3 || case4 || case5) && "no solution") || testing(n, k))
-        }"
-    )
+    # IO.puts(
+    #   "\n\nFINAL ANSWER: " <>
+    #     "#{
+    #       inspect(((case1 || case2 || case3 || case4 || case5) && "no solution") || testing(n, k))
+    #     }"
+    # )
   end
 
   def eightLambda(k) do
@@ -120,3 +158,5 @@ defmodule Project do
     factorize(number, factor + 1, prime_factors)
   end
 end
+
+# module end
