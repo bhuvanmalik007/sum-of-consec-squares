@@ -24,6 +24,7 @@ defmodule SupervisorModule do
     truncatedLength = trunc(n / k)
     totalIntervals = (rem(n, k) == 0 && k) || k + 1
 
+
     intervalList =
       Enum.reduce(1..k, [], fn intervalNo, acc ->
         startNo = (intervalNo - 1) * truncatedLength + 1
@@ -33,9 +34,13 @@ defmodule SupervisorModule do
           Keyword.put_new([], :"interval#{inspect(intervalNo)}", %{start: startNo, end: endingNo})
       end)
 
-      intervalList = (totalIntervals == (k + 1)) &&
+      # IO.puts("\nintervalList: " <> "#{inspect(intervalList)}")
+
+      intervalList = (totalIntervals == ((k + 1)) &&
       (intervalList ++
-        Keyword.put_new([], :"interval#{inspect(k + 1)}", %{start: ((k * trunc(n / k)) + 1), end: n}))
+        Keyword.put_new([], :"interval#{inspect(k + 1)}", %{start: ((k * trunc(n / k)) + 1), end: n}))) || intervalList
+
+        IO.puts("\nintervalList: " <> "#{inspect(intervalList)}")
 
       filteredIntervals = Enum.reduce(1..length(intervalList), intervalList, fn(i, acc) ->
         spawn(SupervisorModule, :sumOfSquares, [Keyword.get(intervalList, :"interval#{inspect(i)}"), k, resultReceiverPID])
