@@ -41,14 +41,8 @@ defmodule SupervisorModule do
 
   # This process computes a sequence within the interval range it was given and validates if the result is a perfect square
   def sumOfSquares(interval, k, next_pid) do
-    # IO.puts("interval is #{inspect(interval)}")
     # IO.puts("Running on bhuvan's machine")
-    start = Map.get(interval, :start)
-    finish = Map.get(interval, :end)
-    result = Enum.reduce(start..finish, [], fn x, acc ->
-      sqRoot = :math.sqrt((k - 1) * k * (2 * k - 1) / 6 + k * (x * x) + k * (k - 1) * x)
-      (sqRoot - trunc(sqRoot) == 0 && acc ++ [x]) || acc
-    end)
+    result = resultCalc(Map.get(interval, :start), Map.get(interval, :end), k)
 
     # Adding result of this process to overall result
     receive do
@@ -56,13 +50,17 @@ defmodule SupervisorModule do
     end
   end
 
+  def resultCalc(start, finish, k) do
+    Enum.reduce(start..finish, [], fn x, acc ->
+      sqRoot = :math.sqrt((k - 1) * k * (2 * k - 1) / 6 + k * (x * x) + k * (k - 1) * x)
+      (sqRoot - trunc(sqRoot) == 0 && acc ++ [x]) || acc
+    end)
+  end
+
   # Spawns the supervisor process
   def run(n, k) do
     if n < k do
-      final_answer = Enum.reduce(1..n, [], fn x, acc ->
-        sqRoot = :math.sqrt((k - 1) * k * (2 * k - 1) / 6 + k * (x * x) + k * (k - 1) * x)
-        (sqRoot - trunc(sqRoot) == 0 && acc ++ [x]) || acc
-        end)
+      final_answer = resultCalc(1, n, k)
         (final_answer == [] && IO.puts("Result: No sequence")) || IO.puts("Result is #{inspect(final_answer)}")
       else
         IO.puts inspect :timer.tc(SupervisorModule, :supervisor, [n, k])
