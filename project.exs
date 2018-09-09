@@ -15,6 +15,8 @@ defmodule SupervisorModule do
           Keyword.put_new([], :"interval#{inspect(intervalNo)}", %{start: startNo, end: endingNo})
       end)
 
+      IO.puts("#{inspect(intervalList)}")
+
       # Adding remaining elements into another interval if totalIntervals = k + 1
       intervalList = (totalIntervals == ((k + 1)) &&
       (intervalList ++
@@ -35,7 +37,7 @@ defmodule SupervisorModule do
       # Receiving final result from the first process that was created
       receive do
         final_answer ->
-          (final_answer == [] && IO.puts("Result: No sequence")) || IO.puts("Result is #{inspect(final_answer)}")
+          (final_answer == [] && IO.puts("No sequences found")) || IO.puts("Starting numbers of the sequences are: #{inspect(final_answer)}")
       end
   end # end of supervisor
 
@@ -61,7 +63,7 @@ defmodule SupervisorModule do
   def run(n, k) do
     if n < k do
       final_answer = resultCalc(1, n, k)
-        (final_answer == [] && IO.puts("Result: No sequence")) || IO.puts("Result is #{inspect(final_answer)}")
+        (final_answer == [] && IO.puts("No sequences found.")) || IO.puts("Starting numbers of the sequences are: #{inspect(final_answer)}")
       else
         IO.puts inspect :timer.tc(SupervisorModule, :supervisor, [n, k])
     end
