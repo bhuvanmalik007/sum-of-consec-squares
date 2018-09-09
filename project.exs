@@ -1,14 +1,14 @@
 defmodule SupervisorModule do
   def supervisor(n, k) do
     # Total intervals are either k or k + 1
-    truncatedIntervalListLength = trunc(n / k)
+    intervalListLength = trunc(n / k)
     totalIntervals = (rem(n, k) == 0 && k) || k + 1
 
     # Complex array defining interval ranges
     intervalList =
       Enum.reduce(1..k, [], fn intervalNo, acc ->
-        startNo = (intervalNo - 1) * truncatedLength + 1
-        endingNo = intervalNo * truncatedLength
+        startNo = (intervalNo - 1) * intervalListLength + 1
+        endingNo = intervalNo * intervalListLength
         acc ++
           Keyword.put_new([], :"interval#{inspect(intervalNo)}", %{start: startNo, end: endingNo})
       end)
@@ -19,6 +19,7 @@ defmodule SupervisorModule do
         Keyword.put_new([], :"interval#{inspect(k + 1)}", %{start: ((k * trunc(n / k)) + 1), end: n}))) || intervalList
 
       # Creating, initializing calculations by passing aruguments and linking processes to each other
+      # Spawning half the process in a remote node if it is connected
       # Storing lastProcessPID
       lastProcessPID = Enum.reduce(1..length(intervalList), self(), fn(i, acc) ->
         (Node.alive?() && (rem(i, 2) == 0) && Node.spawn_link(:"madhukar@10.20.217.252", SupervisorModule, :sumOfSquares, [Keyword.get(intervalList, :"interval#{inspect(i)}"), k, acc]))
@@ -27,7 +28,7 @@ defmodule SupervisorModule do
       end) # end of reduce
 
       # Initializing message passing from the last proces created
-      send last, []
+      send lastProcessPID, []
 
       # Receiving final result from the first process that was created
       receive do
