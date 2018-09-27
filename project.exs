@@ -15,8 +15,6 @@ defmodule SupervisorModule do
           Keyword.put_new([], :"interval#{inspect(intervalNo)}", %{start: startNo, end: endingNo})
       end)
 
-      IO.puts("#{inspect(intervalList)}")
-
       # Adding remaining elements into another interval if totalIntervals = k + 1
       intervalList = (totalIntervals == ((k + 1)) &&
       (intervalList ++
@@ -43,7 +41,7 @@ defmodule SupervisorModule do
 
   # This process computes a sequence within the interval range it was given and validates if the result is a perfect square
   def sumOfSquares(interval, k, next_pid) do
-    # IO.puts("Running on bhuvan's machine")
+    IO.puts("Running on bhuvan's machine")
     result = resultCalc(Map.get(interval, :start), Map.get(interval, :end), k)
 
     # Adding result of this process to overall result
